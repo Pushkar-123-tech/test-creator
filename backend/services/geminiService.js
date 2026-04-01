@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
+import vm from "node:vm";
 
 dotenv.config();
 
@@ -7,13 +7,83 @@ if (!process.env.GEMINI_API_KEY) {
   throw new Error("Missing GEMINI_API_KEY environment variable.");
 }
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.0";
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
+const MODEL_CANDIDATES = [
+  GEMINI_MODEL,
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-001",
+  "gemini-flash-latest",
+  "gemini-2.0-flash-lite",
+  "gemini-2.0-flash-lite-001"
+].filter((modelName, index, arr) => modelName && arr.indexOf(modelName) === index);
+
+const isModelNotFoundError = (error) => {
+  const message = String(error?.message || "").toLowerCase();
+  return message.includes("404") || message.includes("not found") || message.includes("models/");
+};
+
+const generateWithModelFallback = async (prompt) => {
+  let lastError;
+
+  for (const modelName of MODEL_CANDIDATES) {
+    try {
+      const response = await fetch(
+        `${GEMINI_API_BASE}/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: prompt }]
+              }
+            ]
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+
+        if (response.status === 404) {
+          throw new Error(`Model ${modelName} not found: ${errorText}`);
+        }
+
+        if (response.status === 429 || response.status === 503) {
+          throw new Error(
+            `Retryable Gemini error on ${modelName} (HTTP ${response.status}): ${errorText}`
+          );
+        }
+
+        throw new Error(`Gemini API error ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      return { result, modelName };
+    } catch (error) {
+      lastError = error;
+      const message = String(error?.message || "");
+      const isRetryable = message.includes("Retryable Gemini error");
+
+      if (isModelNotFoundError(error) || isRetryable) {
+        console.warn(`Gemini model unavailable: ${modelName}. Trying next model.`);
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error(
+    `No supported Gemini model found. Checked: ${MODEL_CANDIDATES.join(", ")}. Last error: ${lastError?.message || "Unknown error"}`
+  );
+};
 
 const getResponseText = (aiResult) => {
-  if (!aiResult || !aiResult.response) return null;
-  const response = aiResult.response;
+  if (!aiResult) return null;
+  const response = aiResult.response || aiResult;
   if (typeof response.text === "function") {
     try {
       return response.text();
@@ -31,6 +101,29 @@ const getResponseText = (aiResult) => {
   }
 
   return JSON.stringify(response);
+};
+
+const parseLooseJsonObject = (text) => {
+  const cleanedText = String(text || "")
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const start = cleanedText.indexOf("{");
+  const end = cleanedText.lastIndexOf("}");
+  if (start === -1 || end === -1) {
+    throw new Error("No JSON object found in AI response");
+  }
+
+  const jsonLike = cleanedText.substring(start, end + 1);
+
+  try {
+    return JSON.parse(jsonLike);
+  } catch {
+    // Gemini can return JS-style object literals (Number.*, NaN, Infinity, undefined).
+    // Evaluate in a sandboxed context to coerce into a plain object.
+    return vm.runInNewContext(`(${jsonLike})`, {}, { timeout: 1000 });
+  }
 };
 
 /**
@@ -72,7 +165,7 @@ Return a valid JSON object with this structure:
 }
 `;
 
-    const result = await model.generateContent(prompt);
+    const { result, modelName } = await generateWithModelFallback(prompt);
     const text = getResponseText(result);
 
     if (!text) {
@@ -84,17 +177,9 @@ Return a valid JSON object with this structure:
       };
     }
 
-    // Improved JSON extraction
     let testData;
     try {
-      // Find the first { and the last }
-      const start = text.indexOf('{');
-      const end = text.lastIndexOf('}');
-      if (start === -1 || end === -1) {
-        throw new Error("No JSON found in response");
-      }
-      const jsonStr = text.substring(start, end + 1);
-      testData = JSON.parse(jsonStr);
+      testData = parseLooseJsonObject(text);
     } catch (parseError) {
       console.error("Failed to parse AI response:", text, parseError);
       return {
@@ -108,6 +193,7 @@ Return a valid JSON object with this structure:
     return {
       success: true,
       testType,
+      model: modelName,
       data: testData,
       timestamp: new Date().toISOString()
     };
@@ -145,7 +231,7 @@ Please provide:
 Format the response as JSON with keys: description, parameters, examples, edgeCases, notes
 `;
 
-    const result = await model.generateContent(prompt);
+    const { result, modelName } = await generateWithModelFallback(prompt);
     const text = getResponseText(result);
 
     if (!text) {
@@ -162,6 +248,7 @@ Format the response as JSON with keys: description, parameters, examples, edgeCa
     
     return {
       success: true,
+      model: modelName,
       data: docData,
       timestamp: new Date().toISOString()
     };
@@ -198,7 +285,7 @@ ${code}
 Return JSON with keys: issues, performance, security, bestPractices, suggestions, overallScore (1-10)
 `;
 
-    const result = await model.generateContent(prompt);
+    const { result, modelName } = await generateWithModelFallback(prompt);
     const text = getResponseText(result);
     
     if (!text) {
@@ -215,6 +302,7 @@ Return JSON with keys: issues, performance, security, bestPractices, suggestions
     
     return {
       success: true,
+      model: modelName,
       data: analysisData,
       timestamp: new Date().toISOString()
     };
@@ -250,7 +338,7 @@ Please provide:
 Format response as JSON with keys: code, usage, tests, notes
 `;
 
-    const result = await model.generateContent(prompt);
+    const { result, modelName } = await generateWithModelFallback(prompt);
     const text = getResponseText(result);
 
     if (!text) {
@@ -268,6 +356,7 @@ Format response as JSON with keys: code, usage, tests, notes
     return {
       success: true,
       language,
+      model: modelName,
       data: codeData,
       timestamp: new Date().toISOString()
     };
@@ -305,7 +394,7 @@ Provide:
 Return JSON with keys: timeComplexity, spaceComplexity, suggestions, optimizedCode, improvementPercentage
 `;
 
-    const result = await model.generateContent(prompt);
+    const { result, modelName } = await generateWithModelFallback(prompt);
     const text = getResponseText(result);
 
     if (!text) {
@@ -322,6 +411,7 @@ Return JSON with keys: timeComplexity, spaceComplexity, suggestions, optimizedCo
     
     return {
       success: true,
+      model: modelName,
       data: optimizationData,
       timestamp: new Date().toISOString()
     };
@@ -347,7 +437,7 @@ export const chatWithAI = async (message, context = "") => {
       ? `Code Context:\n\`\`\`\n${context}\n\`\`\`\n\nUser Question: ${message}`
       : message;
 
-    const result = await model.generateContent(prompt);
+    const { result, modelName } = await generateWithModelFallback(prompt);
     const text = getResponseText(result);
 
     if (!text) {
@@ -361,6 +451,7 @@ export const chatWithAI = async (message, context = "") => {
 
     return {
       success: true,
+      model: modelName,
       response: text,
       timestamp: new Date().toISOString()
     };

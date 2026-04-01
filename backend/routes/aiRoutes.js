@@ -242,7 +242,7 @@ router.get("/debug", async (req, res) => {
     return res.json({
       success: true,
       message: "Debug check for AI model call",
-      model: process.env.GEMINI_MODEL || "gemini-1.0",
+      model: process.env.GEMINI_MODEL || "gemini-1.5-flash-002",
       result
     });
   } catch (error) {
