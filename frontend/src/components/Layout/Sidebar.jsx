@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, History, BarChart2, LayoutTemplate, Settings, Sparkles, LogOut, User } from 'lucide-react';
+import { Zap, History, BarChart2, LayoutTemplate, Sparkles, LogOut, User } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 
 const navItems = {
@@ -10,7 +10,6 @@ const navItems = {
   ],
   tools: [
     { id: 'templates', label: 'Templates', icon: LayoutTemplate },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ]
 };
 

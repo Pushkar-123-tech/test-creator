@@ -6,7 +6,6 @@ import { Dashboard } from './components/Dashboard/Dashboard';
 import { TestGenerator } from './components/Generator/TestGenerator';
 import { History } from './components/History/History';
 import { TemplatesGrid } from './components/Templates/TemplatesGrid';
-import { Settings } from './components/Settings/Settings';
 import { AppProvider, useAppContext } from './components/contexts/AppContext';
 import Auth from './components/Auth/Auth';
 import { supabase } from './utils/supabase';
@@ -37,8 +36,6 @@ function AppContent() {
         return <History showToast={showToast} />;
       case 'templates':
         return <TemplatesGrid onSelectTemplate={handleTemplateSelect} />;
-      case 'settings':
-        return <Settings />;
       default:
         return <Dashboard showToast={showToast} />;
     }
