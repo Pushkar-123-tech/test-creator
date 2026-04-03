@@ -82,16 +82,16 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 lg:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-2">
             AI Test Case Generator
           </h1>
-          <p className="text-slate-400 text-lg">Describe your feature and let AI create comprehensive test cases.</p>
+          <p className="text-slate-400 text-base lg:text-lg">Describe your feature and let AI create comprehensive test cases.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 lg:justify-end">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-full">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium text-green-400">AI Online</span>
@@ -100,13 +100,13 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 lg:gap-8">
         {/* Left Column */}
         <div className="flex flex-col gap-6">
           {/* Input Section */}
-          <div className="glass p-8">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-              <Sparkles className="text-primary-500" size={24} />
+          <div className="glass p-4 sm:p-6 lg:p-8">
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 lg:mb-6 flex items-center gap-3">
+              <Sparkles className="text-primary-500" size={20} lg:size={24} />
               Feature Requirements
             </h2>
             <div className="flex flex-col gap-4">
@@ -114,14 +114,14 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
                 <label className="text-sm font-medium text-slate-300 block mb-3">Feature Description *</label>
                 <textarea
                   className="ai-input"
-                  rows="5"
+                  rows="4"
                   placeholder="e.g. 'User login with email and password. Validate email format, password strength, rate limiting after 5 failed attempts, and 2FA option...'"
                   value={requirement}
                   onChange={(e) => setRequirement(e.target.value)}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-slate-300 block mb-3">Module</label>
                   <select className="ai-input py-3" value={module} onChange={(e) => setModule(e.target.value)}>
@@ -149,7 +149,7 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-slate-300 block mb-3">Number of Cases</label>
                   <select className="ai-input py-3" value={caseCount} onChange={(e) => setCaseCount(e.target.value)}>
@@ -173,10 +173,10 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
           </div>
 
           {/* Generated Test Cases */}
-          <div className="glass p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="glass p-4 sm:p-6 lg:p-8">
+            <div className="flex items-center justify-between mb-4 lg:mb-6">
               <div>
-                <h2 className="text-xl font-bold text-white mb-1">Generated Test Cases</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-white mb-1">Generated Test Cases</h2>
                 <p className="text-sm text-slate-400">
                   <span id="tc-count">{testCases.length}</span> cases generated
                 </p>
@@ -189,7 +189,7 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
 
             <div className="flex flex-col gap-4">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-16">
+                <div className="flex flex-col items-center justify-center py-12 lg:py-16">
                   <div className="loading-spinner mb-4"></div>
                   <p className="text-slate-300 font-medium">AI is generating test cases...</p>
                   <p className="text-sm text-slate-500 mt-2">This may take a few moments</p>
@@ -199,9 +199,9 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
                   <TestCaseCard key={testCase.id} testCase={testCase} />
                 ))
               ) : (
-                <div className="text-center py-16">
-                  <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Sparkles size={24} className="text-slate-600" />
+                <div className="text-center py-12 lg:py-16">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles size={20} lg:size={24} className="text-slate-600" />
                   </div>
                   <p className="text-slate-300 font-medium">No test cases generated yet</p>
                   <p className="text-sm text-slate-500 mt-2">Fill in the requirements and click generate</p>
@@ -216,7 +216,7 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
           <AISettings settings={settings} setSettings={setSettings} />
 
           <button
-            className={`btn-primary w-full py-5 text-lg font-semibold flex items-center justify-center gap-3 ${!loading ? 'animate-glow' : ''}`}
+            className={`btn-primary w-full py-4 lg:py-5 text-base lg:text-lg font-semibold flex items-center justify-center gap-3 ${!loading ? 'animate-glow' : ''}`}
             onClick={handleGenerate}
             disabled={loading}
           >
@@ -227,7 +227,7 @@ export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Sparkles size={20} />
+                <Sparkles size={18} lg:size={20} />
                 <span>Generate Test Cases</span>
               </div>
             )}

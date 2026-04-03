@@ -54,8 +54,8 @@ export function History({ showToast }) {
 
   if (loading) {
     return (
-      <div className="p-7">
-        <div className="text-center py-12">
+      <div className="p-4 sm:p-6 lg:p-7">
+        <div className="text-center py-8 sm:py-12">
           <div className="loading-spinner inline-block"></div>
           <p className="text-sm text-[#66667a] mt-2">Loading your history...</p>
         </div>
@@ -64,16 +64,16 @@ export function History({ showToast }) {
   }
 
   return (
-    <div className="p-7">
-      <div className="flex items-center justify-between mb-7">
+    <div className="p-4 sm:p-6 lg:p-7">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 lg:mb-7 gap-4">
         <div>
-          <h1 className="syne text-[22px] font-extrabold text-[#e8e8f0] mb-1">Generation History</h1>
-          <p className="text-[13px] text-[#66667a]">All your previously generated test case sets.</p>
+          <h1 className="syne text-xl sm:text-2xl lg:text-[22px] font-extrabold text-[#e8e8f0] mb-1">Generation History</h1>
+          <p className="text-sm text-[#66667a]">All your previously generated test case sets.</p>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex gap-2.5 w-full sm:w-auto">
           <input
             type="text"
-            className="ai-input w-[220px]"
+            className="ai-input w-full sm:w-[220px]"
             placeholder="Search generations…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

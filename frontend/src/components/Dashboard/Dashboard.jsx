@@ -38,23 +38,23 @@ export function Dashboard({ showToast }) {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-2">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 lg:mb-8 gap-4">
+        <div className="pt-12 lg:pt-0">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-2">
             Welcome back, {user?.email?.split('@')[0] || 'User'} 👋
           </h1>
-          <p className="text-slate-400 text-lg">Track your software testing progress and coverage metrics.</p>
+          <p className="text-slate-400 text-base lg:text-lg">Track your software testing progress and coverage metrics.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 lg:justify-end">
           <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-slate-400">All systems operational</span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
         {stats.map((stat, index) => (
           <StatsCard key={index} {...stat} />
         ))}

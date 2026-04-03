@@ -5,7 +5,7 @@ import { Zap, Trash2 } from 'lucide-react';
 export function HistoryGrid({ history, onDelete }) {
   if (history.length === 0) {
     return (
-      <div className="glass p-12 text-center">
+      <div className="glass p-8 sm:p-12 text-center">
         <Zap size={40} className="text-[#a78bfa] mx-auto mb-3" />
         <p className="text-[#e8e8f0] font-semibold">No history found</p>
         <p className="text-sm text-[#66667a]">Generate your first test cases to see them here</p>
@@ -18,21 +18,21 @@ export function HistoryGrid({ history, onDelete }) {
       {history.map((item) => (
         <div
           key={item.id}
-          className="glass p-5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-[#6c63ff]/40"
+          className="glass p-4 sm:p-5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-[#6c63ff]/40"
         >
-          <div className="flex items-start justify-between mb-3.5">
-            <div className="w-10 h-10 bg-[#6c63ff]/25 rounded-xl flex items-center justify-center">
+          <div className="flex items-start justify-between mb-3 sm:mb-3.5">
+            <div className="w-10 h-10 bg-[#6c63ff]/25 rounded-xl flex items-center justify-center flex-shrink-0">
               <Zap size={20} color="#a78bfa" />
             </div>
             <span className="badge badge-purple">Generated</span>
           </div>
-          <h3 className="syne text-sm font-bold text-[#e8e8f0] mb-1">
+          <h3 className="syne text-sm font-bold text-[#e8e8f0] mb-1 leading-tight">
             {item.requirement.substring(0, 40)}...
           </h3>
           <p className="text-xs text-[#66667a] mb-3">
             {item.module} · {item.test_type}
           </p>
-          <div className="flex items-center gap-3 text-[11px] text-[#66667a] mb-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] text-[#66667a] mb-3">
             <span><strong>{item.cases_count}</strong> cases</span>
             <span>·</span>
             <span>{new Date(item.created_at).toLocaleDateString()}</span>
