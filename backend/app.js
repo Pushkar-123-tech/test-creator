@@ -13,8 +13,9 @@ const app=express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://test-creator-git-main-pushkars-projects-d3a23d4a.vercel.app/"
+    "https://test-creator-9pk1.vercel.app"
   ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 app.use(express.json());
