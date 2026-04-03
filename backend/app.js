@@ -10,18 +10,34 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app=express();
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://test-creator-9pk1.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
-app.use(morgan("dev"));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://test-creator-9pk1.vercel.app"
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    if (origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+
+// ✅ IMPORTANT: use SAME config here
+app.options("*", cors(corsOptions));
 // Serve static files from the frontend build directory
 const frontendDistPath = path.join(__dirname, "../frontend/dist")
 
