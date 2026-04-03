@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename)
 const app=express();
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://test-creator-9pk1.vercel.app"
+  "https://test-creator-9pk1.vercel.app/"
 ];
 
 const corsOptions = {
