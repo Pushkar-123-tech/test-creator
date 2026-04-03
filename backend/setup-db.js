@@ -13,7 +13,7 @@ async function setupDatabase() {
   try {
     console.log('🔍 Checking database tables...\n');
 
-    const tables = ['test_cases', 'code_analysis', 'chat_history'];
+    const tables = ['users', 'test_cases', 'code_analysis', 'chat_history', 'generations'];
     const missingTables = [];
 
     for (const table of tables) {
@@ -62,6 +62,19 @@ async function setupDatabase() {
       console.log('  user_id UUID,');
       console.log('  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
       console.log(');');
+      console.log('');
+
+      console.log('-- Users Table');
+      console.log('CREATE TABLE IF NOT EXISTS users (');
+      console.log('  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),');
+      console.log('  auth_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,');
+      console.log('  email VARCHAR(255) UNIQUE NOT NULL,');
+      console.log('  full_name VARCHAR(255),');
+      console.log('  avatar_url TEXT,');
+      console.log('  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,');
+      console.log('  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+      console.log(');');
+      console.log('');
       console.log('```');
 
       console.log('\n📍 Go to: https://supabase.com/dashboard/project/[your-project-id]/sql');

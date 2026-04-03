@@ -170,11 +170,91 @@ export const getChatHistory = async (userId = null, limit = 20) => {
   }
 };
 
+/**
+ * Save generation to database
+ */
+export const saveGeneration = async (generationData, userId = null) => {
+  try {
+    const { data, error } = await supabase
+      .from("generations")
+      .insert([
+        {
+          requirement: generationData.requirement,
+          module: generationData.module,
+          test_type: generationData.testType,
+          cases_count: generationData.casesCount,
+          generated_tests: generationData.generatedTests,
+          user_id: userId,
+          created_at: new Date().toISOString()
+        }
+      ])
+      .select();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error saving generation:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Get generations from database
+ */
+export const getGenerations = async (userId = null, limit = 20) => {
+  try {
+    let query = supabase
+      .from("generations")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error retrieving generations:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Delete generation from database
+ */
+export const deleteGeneration = async (generationId, userId = null) => {
+  try {
+    let query = supabase
+      .from("generations")
+      .delete()
+      .eq("id", generationId);
+
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
+
+    const { error } = await query;
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting generation:", error);
+    return { success: false, error: error.message };
+  }
+};
+
 export default {
   saveTestCase,
   getTestCases,
   saveAnalysis,
   getAnalytics,
   saveChatMessage,
-  getChatHistory
+  getChatHistory,
+  saveGeneration,
+  getGenerations,
+  deleteGeneration
 };

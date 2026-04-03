@@ -144,20 +144,27 @@ ${codeSnippet}
 
 Please provide:
 1. Test cases in a structured JSON format
-2. Each test case should include: description, input, expectedOutput, and assertion
-3. Cover happy path, edge cases, and error scenarios
-4. Use common testing frameworks (Jest, Mocha, etc.)
+2. Each test case MUST include: description, input, expectedOutput, and testCode
+3. The description should clearly state the exact possible inputs and expected outputs
+4. Cover happy path, edge cases, and error scenarios
+5. Use common testing frameworks (Jest, Mocha, etc.)
 
-IMPORTANT: Return ONLY the JSON object. Do not include any other text or markdown formatting before or after the JSON.
+CRITICAL REQUIREMENTS:
+- Every test case MUST have an "input" field describing the exact input values/parameters
+- Every test case MUST have an "expectedOutput" field describing the exact expected result
+- The description should include the input and expected output details
+- Do not skip these fields under any circumstances
+
+Return ONLY the JSON object. Do not include any other text or markdown formatting before or after the JSON.
 
 Return a valid JSON object with this structure:
 {
   "testCases": [
     {
       "id": 1,
-      "description": "Test description",
-      "input": "input values",
-      "expectedOutput": "expected output",
+      "description": "Test description including exact input and expected output",
+      "input": "Exact input values or parameters (REQUIRED)",
+      "expectedOutput": "Exact expected output or result (REQUIRED)",
       "testCode": "test code snippet"
     }
   ],

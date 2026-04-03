@@ -7,7 +7,7 @@ import {
   generateCode,
   optimizeCode
 } from "../services/geminiService.js";
-import { saveTestCase, saveAnalysis, saveChatMessage, getTestCases, getAnalytics } from "../utils/supabaseUtils.js";
+import { saveTestCase, saveAnalysis, saveChatMessage, getTestCases, getAnalytics, saveGeneration, getGenerations, deleteGeneration } from "../utils/supabaseUtils.js";
 
 const router = express.Router();
 
@@ -33,6 +33,35 @@ router.get("/analytics", async (req, res) => {
   try {
     const { userId } = req.query;
     const result = await getAnalytics(userId);
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/ai/generations
+ * Get user's test case generations
+ */
+router.get("/generations", async (req, res) => {
+  try {
+    const { userId, limit = 20 } = req.query;
+    const result = await getGenerations(userId, parseInt(limit));
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/ai/generations/:id
+ * Delete a generation
+ */
+router.delete("/generations/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.query;
+    const result = await deleteGeneration(id, userId);
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
@@ -71,6 +100,55 @@ router.post("/generate-tests", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to generate test cases",
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/ai/generate-from-requirement
+ * Generate test cases from requirement description
+ */
+router.post("/generate-from-requirement", async (req, res) => {
+  try {
+    const { requirement, module, testType = "Mixed", caseCount = 10, coverage = "Standard", settings = {}, userId = null } = req.body;
+
+    if (!requirement) {
+      return res.status(400).json({
+        success: false,
+        message: "Requirement is required"
+      });
+    }
+
+    // Create a prompt for the AI
+    const prompt = `
+      Feature: ${requirement}
+      Module: ${module}
+      Test Type: ${testType}
+      Number of cases: ${caseCount}
+      Coverage: ${coverage}
+      Settings: ${JSON.stringify(settings)}
+    `;
+
+    const result = await generateTestCases(prompt, testType.toLowerCase());
+    
+    // Save generation to database if result is successful and we have a userId
+    if (result.success && userId) {
+      await saveGeneration({
+        requirement,
+        module,
+        testType,
+        casesCount: result.data.testCases ? result.data.testCases.length : caseCount,
+        generatedTests: result.data.testCases
+      }, userId);
+    }
+
+    return res.json(result);
+  } catch (error) {
+    console.error("Error in /generate-from-requirement:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate test cases from requirement",
       error: error.message
     });
   }
