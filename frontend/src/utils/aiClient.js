@@ -14,25 +14,25 @@ export class AIClient {
    */
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers
-    };
 
     try {
       const response = await fetch(url, {
-        ...options,
-        headers
+        method: options.method || "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: options.body ? JSON.stringify(JSON.parse(options.body)) : undefined
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'API request failed');
+        throw new Error(data.message || "API request failed");
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       throw error;
     }
   }
