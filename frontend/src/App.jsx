@@ -5,7 +5,6 @@ import { Toast } from './components/Layout/Toast';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { TestGenerator } from './components/Generator/TestGenerator';
 import { History } from './components/History/History';
-import { AnalyticsDashboard } from './components/Analytics/AnalyticsDashboard';
 import { TemplatesGrid } from './components/Templates/TemplatesGrid';
 import { Settings } from './components/Settings/Settings';
 import { AppProvider, useAppContext } from './components/contexts/AppContext';
@@ -16,10 +15,16 @@ function AppContent() {
   const { user, loading } = useAppContext();
   const [currentView, setCurrentView] = useState('dashboard');
   const [toast, setToast] = useState({ show: false, message: '' });
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   const showToast = (message) => {
     setToast({ show: true, message });
     setTimeout(() => setToast({ show: false, message: '' }), 3000);
+  };
+
+  const handleTemplateSelect = (template) => {
+    setSelectedTemplate(template);
+    setCurrentView('generator');
   };
 
   const renderView = () => {
@@ -27,13 +32,11 @@ function AppContent() {
       case 'dashboard':
         return <Dashboard showToast={showToast} />;
       case 'generator':
-        return <TestGenerator showToast={showToast} />;
+        return <TestGenerator showToast={showToast} selectedTemplate={selectedTemplate} onTemplateUsed={() => setSelectedTemplate(null)} />;
       case 'history':
         return <History showToast={showToast} />;
-      case 'analytics':
-        return <AnalyticsDashboard />;
       case 'templates':
-        return <TemplatesGrid />;
+        return <TemplatesGrid onSelectTemplate={handleTemplateSelect} />;
       case 'settings':
         return <Settings />;
       default:

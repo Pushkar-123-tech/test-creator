@@ -46,6 +46,16 @@ export class AIClient {
   }
 
   /**
+   * Generate test cases from requirement
+   */
+  async generateFromRequirement(requirement, module, testType = 'Mixed', caseCount = 10, coverage = 'Standard', settings = {}, userId = null) {
+    return this.request('/api/ai/generate-from-requirement', {
+      method: 'POST',
+      body: JSON.stringify({ requirement, module, testType, caseCount, coverage, settings, userId })
+    });
+  }
+
+  /**
    * Analyze code
    */
   async analyzeCode(code, userId = null) {

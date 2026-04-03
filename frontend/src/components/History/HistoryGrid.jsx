@@ -30,12 +30,12 @@ export function HistoryGrid({ history, onDelete }) {
             {item.requirement.substring(0, 40)}...
           </h3>
           <p className="text-xs text-[#66667a] mb-3">
-            {item.module} · {item.testType}
+            {item.module} · {item.test_type}
           </p>
           <div className="flex items-center gap-3 text-[11px] text-[#66667a] mb-3">
-            <span><strong>{item.cases}</strong> cases</span>
+            <span><strong>{item.cases_count}</strong> cases</span>
             <span>·</span>
-            <span>{new Date(item.date).toLocaleDateString()}</span>
+            <span>{new Date(item.created_at).toLocaleDateString()}</span>
           </div>
           <button
             className="btn-ghost w-full py-2 text-xs flex items-center justify-center gap-1.5"

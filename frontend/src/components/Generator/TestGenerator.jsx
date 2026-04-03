@@ -1,15 +1,15 @@
 // components/Generator/TestGenerator.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TestCaseCard from './TestCaseCard';
 import AISettings from './AISettings';
 import { Sparkles } from 'lucide-react';
 import { aiClient } from '../../utils/aiClient';
 import { useAppContext } from '../contexts/AppContext';
 
-export function TestGenerator({ showToast }) {
+export function TestGenerator({ showToast, selectedTemplate, onTemplateUsed }) {
   const { user } = useAppContext();
-  const [requirement, setRequirement] = useState('');
-  const [module, setModule] = useState('Authentication');
+  const [requirement, setRequirement] = useState(selectedTemplate?.requirement || '');
+  const [module, setModule] = useState(selectedTemplate?.title?.toLowerCase().includes('auth') ? 'Authentication' : 'Other');
   const [testType, setTestType] = useState('Mixed');
   const [caseCount, setCaseCount] = useState('10');
   const [coverage, setCoverage] = useState('Standard');
@@ -21,6 +21,24 @@ export function TestGenerator({ showToast }) {
     autoPrioritize: true,
   });
 
+  // Effect to update requirement when selectedTemplate changes
+  useEffect(() => {
+    if (selectedTemplate) {
+      setRequirement(selectedTemplate.requirement);
+      // Set module based on template
+      if (selectedTemplate.title.toLowerCase().includes('auth')) setModule('Authentication');
+      else if (selectedTemplate.title.toLowerCase().includes('payment')) setModule('Payment');
+      else if (selectedTemplate.title.toLowerCase().includes('database')) setModule('Database');
+      else if (selectedTemplate.title.toLowerCase().includes('api')) setModule('API');
+      else if (selectedTemplate.title.toLowerCase().includes('ui')) setModule('UI/UX');
+      else if (selectedTemplate.title.toLowerCase().includes('performance')) setModule('Performance');
+      else setModule('Other');
+      
+      // Clear the template after use
+      if (onTemplateUsed) onTemplateUsed();
+    }
+  }, [selectedTemplate, onTemplateUsed]);
+
   const handleGenerate = async () => {
     if (!requirement.trim()) {
       showToast('Please describe your feature');
@@ -30,17 +48,7 @@ export function TestGenerator({ showToast }) {
     setLoading(true);
 
     try {
-      // Use real AI generation instead of mock
-      const prompt = `
-        Feature: ${requirement}
-        Module: ${module}
-        Test Type: ${testType}
-        Number of cases: ${caseCount}
-        Coverage: ${coverage}
-        Settings: ${JSON.stringify(settings)}
-      `;
-
-      const response = await aiClient.generateTests(prompt, testType.toLowerCase(), user?.id);
+      const response = await aiClient.generateFromRequirement(requirement, module, testType, caseCount, coverage, settings, user?.id);
       console.log("AI Response:", response);
       
       if (response.success && response.data && response.data.testCases) {
@@ -224,26 +232,6 @@ export function TestGenerator({ showToast }) {
               </div>
             )}
           </button>
-
-
-          {/* Stats Panel */}
-          <div className="glass p-5">
-            <div className="text-xs font-semibold text-[#a78bfa] tracking-wide uppercase mb-3.5">Quick Stats</div>
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between">
-                <span className="text-[#66667a]">Total Generated</span>
-                <span className="syne text-[#a78bfa] font-bold">248</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#66667a]">Saved Sets</span>
-                <span className="syne text-[#a78bfa] font-bold">12</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#66667a]">This Month</span>
-                <span className="syne text-[#a78bfa] font-bold">156</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

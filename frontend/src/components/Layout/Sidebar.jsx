@@ -7,7 +7,6 @@ const navItems = {
     { id: 'dashboard', label: 'Dashboard', icon: Zap },
     { id: 'generator', label: 'Generator', icon: Sparkles },
     { id: 'history', label: 'History', icon: History },
-    { id: 'analytics', label: 'Analytics', icon: BarChart2 },
   ],
   tools: [
     { id: 'templates', label: 'Templates', icon: LayoutTemplate },

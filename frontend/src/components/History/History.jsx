@@ -1,26 +1,67 @@
 // components/History/History.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HistoryGrid } from './HistoryGrid';
-
-const mockHistory = [
-  { id: 1, requirement: 'User authentication with email and password', module: 'Auth', testType: 'Functional', cases: 10, date: '2024-01-15' },
-  { id: 2, requirement: 'Payment gateway integration with Stripe', module: 'Payment', testType: 'Integration', cases: 15, date: '2024-01-14' },
-  { id: 3, requirement: 'Database connection pooling and optimization', module: 'Database', testType: 'Performance', cases: 8, date: '2024-01-13' },
-];
+import { aiClient } from '../../utils/aiClient';
+import { useAppContext } from '../contexts/AppContext';
 
 export function History({ showToast }) {
+  const { user } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [history, setHistory] = useState(mockHistory);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const response = await aiClient.request(`/api/ai/generations?userId=${user.id}`);
+        if (response.success) {
+          setHistory(response.data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch history:', err);
+        showToast('Failed to load history');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [user, showToast]);
 
   const filteredHistory = history.filter(item =>
     item.requirement.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.module.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id) => {
-    setHistory(prev => prev.filter(item => item.id !== id));
-    showToast('Test set deleted successfully');
+  const handleDelete = async (id) => {
+    try {
+      const response = await aiClient.request(`/api/ai/generations/${id}?userId=${user?.id}`, {
+        method: 'DELETE'
+      });
+      if (response.success) {
+        setHistory(prev => prev.filter(item => item.id !== id));
+        showToast('Test set deleted successfully');
+      } else {
+        showToast('Failed to delete test set');
+      }
+    } catch (error) {
+      console.error('Error deleting generation:', error);
+      showToast('Failed to delete test set');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="p-7">
+        <div className="text-center py-12">
+          <div className="loading-spinner inline-block"></div>
+          <p className="text-sm text-[#66667a] mt-2">Loading your history...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-7">

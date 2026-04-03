@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatsCard } from './StatsCard';
 import RecentTests from './RecentTests';
-import AIPanel from './AIPanel';
 import { FileText, CheckCircle, Bug, TrendingUp } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { aiClient } from '../../utils/aiClient';
@@ -35,15 +34,6 @@ export function Dashboard({ showToast }) {
       progress: 0, 
       color: '#a78bfa' 
     },
-    { 
-      icon: CheckCircle, 
-      label: 'Code Analyzed', 
-      value: statsData?.totalAnalyses?.toString() || '0', 
-      change: '+0%', 
-      progress: 0, 
-      color: '#00d4aa' 
-    },
-    { icon: Bug, label: 'Bugs Found', value: '0', change: 'None', progress: 0, color: '#ff6b9d' },
     { icon: TrendingUp, label: 'Active Sessions', value: '1', change: 'Steady', progress: 100, color: '#f59e0b' },
   ];
 
@@ -70,10 +60,9 @@ export function Dashboard({ showToast }) {
         ))}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+      {/* Main Content */}
+      <div className="grid grid-cols-1 gap-6">
         <RecentTests />
-        <AIPanel showToast={showToast} />
       </div>
     </div>
   );
