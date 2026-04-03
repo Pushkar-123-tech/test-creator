@@ -10,21 +10,23 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app=express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://test-creator-git-main-pushkars-projects-d3a23d4a.vercel.app/"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(morgan("dev"));
 
 // Serve static files from the frontend build directory
 const frontendDistPath = path.join(__dirname, "../frontend/dist")
-app.use(express.static(frontendDistPath))
 
 // Health check endpoint
-app.get("/health",(req,res)=>{
-    res.json({
-        success:true,
-        message:"API is running",
-    });
+app.get("/api/health", (req, res) => {
+  res.json({ success: true, message: "API running" });
 });
 
 // AI Routes
