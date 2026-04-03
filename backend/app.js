@@ -36,9 +36,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// ✅ IMPORTANT: use SAME config here
-app.options("*", cors(corsOptions));
-// Serve static files from the frontend build directory
+
 const frontendDistPath = path.join(__dirname, "../frontend/dist")
 
 // Health check endpoint
