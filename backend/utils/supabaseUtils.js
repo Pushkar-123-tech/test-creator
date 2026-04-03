@@ -90,26 +90,34 @@ export const saveAnalysis = async (analysisData, userId = null) => {
  */
 export const getAnalytics = async (userId = null) => {
   try {
-    let testQuery = supabase.from("test_cases").select("*");
+    let generationsQuery = supabase.from("generations").select("*");
     let analysisQuery = supabase.from("code_analysis").select("*");
 
     if (userId) {
-      testQuery = testQuery.eq("user_id", userId);
+      generationsQuery = generationsQuery.eq("user_id", userId);
       analysisQuery = analysisQuery.eq("user_id", userId);
     }
 
-    const { data: testData, error: testError } = await testQuery;
+    const { data: generationsData, error: generationsError } = await generationsQuery;
     const { data: analysisData, error: analysisError } = await analysisQuery;
 
-    if (testError) throw testError;
+    if (generationsError) throw generationsError;
     if (analysisError) throw analysisError;
+
+    // Count total test cases from all generations
+    let totalTestCases = 0;
+    if (generationsData) {
+      totalTestCases = generationsData.reduce((total, generation) => {
+        return total + (generation.cases_count || 0);
+      }, 0);
+    }
 
     return {
       success: true,
       data: {
-        totalTestCases: testData?.length || 0,
+        totalTestCases: totalTestCases,
         totalAnalyses: analysisData?.length || 0,
-        recentTests: testData?.slice(0, 5) || [],
+        recentTests: generationsData?.slice(0, 5) || [],
         recentAnalyses: analysisData?.slice(0, 5) || []
       }
     };
