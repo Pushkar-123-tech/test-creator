@@ -37,7 +37,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 
-const frontendDistPath = path.join(__dirname, "../frontend/dist")
+
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
@@ -55,27 +55,6 @@ app.get("/dashboard", (req, res) => {
     });
 });
 
-// Catch-all route to serve the frontend app
-app.get("*all", (req, res) => {
-    // If the request is for an API route that wasn't matched, it will still fall through here
-    // But we want to exclude /api routes from this catch-all if possible
-    if (req.path.startsWith("/api")) {
-        return res.status(404).json({
-            success: false,
-            message: "API endpoint not found"
-        });
-    }
 
-    const indexPath = path.join(frontendDistPath, "index.html");
-    if (!fs.existsSync(indexPath)) {
-        return res.status(404).json({
-            success: false,
-            message: "Frontend build not found. Please run 'npm run build' in the frontend folder or start the frontend dev server.",
-            expectedPath: indexPath
-        });
-    }
-
-    res.sendFile(indexPath);
-});
 
 export default app;
